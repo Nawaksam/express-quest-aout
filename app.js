@@ -31,6 +31,9 @@ app.post("/api/users", hashPassword, userHandlers.postUser)
 app.put("/api/users/:id", hashPassword, userHandlers.updateUser)
 app.delete("/api/users/:id", userHandlers.deleteUser)
 
+const loginHandlers = require("./loginHandlers")
+app.post("/api/login", userHandlers.retrieveUserPassword, loginHandlers.auth)
+
 app.listen(port, (err) => {
   if (err) {
     console.error("Something bad happened")

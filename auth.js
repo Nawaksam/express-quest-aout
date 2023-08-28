@@ -21,4 +21,6 @@ const hashPassword = async (req, res, next) => {
   next()
 }
 
-module.exports = { hashPassword }
+const verifyToken = async (req, res, next) => {}
+
+module.exports = { hashPassword, verifyToken }

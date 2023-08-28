@@ -118,10 +118,32 @@ const deleteUser = (req, res) => {
     })
 }
 
+const retrieveUserPassword = async (req, res, next) => {
+  const { email } = req.body
+
+  try {
+    await database
+      .query("select * from users where email = ?", [email])
+      .then(([result]) => {
+        if (result[0] !== null) {
+          req.user = result[0]
+        } else {
+          res.sendStatus(404)
+        }
+      })
+  } catch (err) {
+    console.error(err)
+    res.status(500).send("Error retrieving password")
+  }
+
+  next()
+}
+
 module.exports = {
   getUsers,
   getUserById,
   postUser,
   updateUser,
   deleteUser,
+  retrieveUserPassword,
 }
