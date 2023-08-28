@@ -1,7 +1,11 @@
 require("dotenv").config()
 
 const express = require("express")
-const { hashPassword } = require("./auth")
+
+const { hashPassword, verifyToken } = require("./auth")
+const loginHandlers = require("./loginHandlers")
+const movieHandlers = require("./movieHandlers")
+const userHandlers = require("./userHandlers")
 
 const app = express()
 
@@ -13,26 +17,28 @@ const welcome = (req, res) => {
   res.send("Welcome to my favourite movie list")
 }
 
+//Public
 app.get("/", welcome)
-
-const movieHandlers = require("./movieHandlers")
 
 app.get("/api/movies", movieHandlers.getMovies)
 app.get("/api/movies/:id", movieHandlers.getMovieById)
+
+app.get("/api/users", userHandlers.getUsers)
+app.get("/api/users/:id", userHandlers.getUserById)
+
+//Sign-up
+app.post("/api/users", hashPassword, userHandlers.postUser)
+//Sign-in
+app.post("/api/login", userHandlers.retrieveUser, loginHandlers.auth)
+
+//Private
+app.use(verifyToken)
 app.post("/api/movies", movieHandlers.postMovie)
 app.put("/api/movies/:id", movieHandlers.updateMovie)
 app.delete("/api/movies/:id", movieHandlers.deleteMovie)
 
-const userHandlers = require("./userHandlers")
-
-app.get("/api/users", userHandlers.getUsers)
-app.get("/api/users/:id", userHandlers.getUserById)
-app.post("/api/users", hashPassword, userHandlers.postUser)
 app.put("/api/users/:id", hashPassword, userHandlers.updateUser)
 app.delete("/api/users/:id", userHandlers.deleteUser)
-
-const loginHandlers = require("./loginHandlers")
-app.post("/api/login", userHandlers.retrieveUserPassword, loginHandlers.auth)
 
 app.listen(port, (err) => {
   if (err) {

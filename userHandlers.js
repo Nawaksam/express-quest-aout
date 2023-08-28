@@ -78,47 +78,58 @@ const postUser = (req, res) => {
 }
 
 const updateUser = (req, res) => {
-  const id = parseInt(req.params.id)
-  const { firstname, lastname, email, city, language, hashedPassword } =
-    req.body
-
-  database
-    .query(
-      "update users set firstname = ?, lastname = ?, email = ?, city = ?, language = ?, hashed_password = ? where id = ?",
-      [firstname, lastname, email, city, language, hashedPassword, id]
-    )
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send("Not Found")
-      } else {
-        res.sendStatus(204)
-      }
-    })
-    .catch((err) => {
-      console.error(err)
-      res.status(500).send("Error editing the user")
-    })
+  try {
+    const id = parseInt(req.params.id)
+    const { firstname, lastname, email, city, language, hashedPassword } =
+      req.body
+    const { sub } = payload
+    if (id === sub) {
+      database
+        .query(
+          "update users set firstname = ?, lastname = ?, email = ?, city = ?, language = ?, hashed_password = ? where id = ?",
+          [firstname, lastname, email, city, language, hashedPassword, id]
+        )
+        .then(([result]) => {
+          if (result.affectedRows === 0) {
+            res.status(404).send("Not Found")
+          } else {
+            res.sendStatus(204)
+          }
+        })
+    } else {
+      throw new Error("")
+    }
+  } catch (err) {
+    console.error(err)
+    res.status(404).send("Id and payload mismatch")
+  }
 }
 
 const deleteUser = (req, res) => {
-  const id = parseInt(req.params.id)
+  try {
+    const id = parseInt(req.params.id)
+    const { sub } = req.payload
 
-  database
-    .query("delete from users where id = ?", [id])
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send("Not Found")
-      } else {
-        res.sendStatus(204)
-      }
-    })
-    .catch((err) => {
-      console.error(err)
-      res.status(500).send("Error deleting the user")
-    })
+    if (id === sub) {
+      database
+        .query("delete from users where id = ?", [id])
+        .then(([result]) => {
+          if (result.affectedRows === 0) {
+            res.status(404).send("Not Found")
+          } else {
+            res.sendStatus(204)
+          }
+        })
+    } else {
+      throw new Error("")
+    }
+  } catch (err) {
+    console.error(err)
+    res.status(403).send("Id and payload Mismatch")
+  }
 }
 
-const retrieveUserPassword = async (req, res, next) => {
+const retrieveUser = async (req, res, next) => {
   const { email } = req.body
 
   try {
@@ -145,5 +156,5 @@ module.exports = {
   postUser,
   updateUser,
   deleteUser,
-  retrieveUserPassword,
+  retrieveUser,
 }

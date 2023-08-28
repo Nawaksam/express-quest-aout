@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken")
 const argon2 = require("argon2")
 
 const argonOptions = {
@@ -21,6 +22,27 @@ const hashPassword = async (req, res, next) => {
   next()
 }
 
-const verifyToken = async (req, res, next) => {}
+const verifyToken = (req, res, next) => {
+  try {
+    const authHeader = req.get("Authorization")
+
+    if (authHeader == null) {
+      throw new Error("No authorization header")
+    }
+
+    const [type, token] = authHeader.split(" ")
+
+    if (type !== "Bearer") {
+      throw new Error("Not bearer auth")
+    }
+
+    req.payload = jwt.verify(token, process.env.JWT_SECRET)
+
+    next()
+  } catch (err) {
+    console.error(err)
+    res.sendStatus(401)
+  }
+}
 
 module.exports = { hashPassword, verifyToken }
