@@ -82,7 +82,7 @@ const updateUser = (req, res) => {
     const id = parseInt(req.params.id)
     const { firstname, lastname, email, city, language, hashedPassword } =
       req.body
-    const { sub } = payload
+    const { sub } = req.payload
     if (id === sub) {
       database
         .query(
